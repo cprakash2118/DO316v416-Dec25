@@ -1,0 +1,133 @@
+# https://github.com/cprakash2118/DO316v416-Dec25
+
+Point-01-) 
+- Product -> Red Hat OpenShift 
+- Add-On Service -> OpenShift Virtulization (Based on KubeVirt - which is cloud-native model).
+  KubeVirt - Handled by CNCF.
+  https://www.cncf.io/projects/kubevirt/
+  
+1-) Cloud services editions
+   - Red Hat OpenShift Service on AWS            [Platform=AWS;POC=Amazon] - ROSA 
+   - Microsoft Azure Red Hat OpenShift           [Platform=Azure;POC=MS] = ARO 
+   - Red Hat OpenShift Dedicated                 [Platform=AWS/GCP;POC=RH]
+   - Red Hat OpenShift on IBM Cloud              [Platform=IBM;POC=IBM]
+
+2-) Self-managed editions
+   - Red Hat OpenShift Kubernetes Engine         [Basic=RHOKE]
+   - Red Hat OpenShift Container Platform        [Standard=RHOCP]
+   - Red Hat OpenShift Platform Plus             [Add-On=RHOPP]
+   - Red Hat OpenShift Virtualization Engine     [Add-On=RHOV]
+   
+
+Point-02-)
+- CLassroom Environment:-
+  1-) User Details:-
+      Login to VMs/Servers:-
+	   - student/student [sudo access]
+	   - root/redhat 
+	  
+	  Login to OCP clusters:-
+	  - admin/redhatocp [cluster-admin access]
+	  - developer/developer [member only]
+	  - API URL - https://api.ocp4.example.com:6443 
+	  - Web COnsole - https://console-openshift-console.apps.ocp4.example.com 
+	  
+	  FYI:-
+	  - API URL - https://api.clusterName.baseDomain:6443 
+	  - Web URL - https://appName-nsName.apps.clusterName.baseDomain
+	  
+  2-) Domain/Network details:-
+    
+      Network Name                           Domain Name                            IP Range
+      CLassroom Network                     example.com                          172.25.252.0/24
+      Student Network                       lab.example.com 					 172.25.250.0/24 
+      Cluster Network                       ocp4.example.com                     192.168.50.0/24 
+      Server Network (Seperate network)     srv.example.com                      192.168.51.0/24	  
+	  
+  
+  3-) Servers/VMs details:-
+       - workstation.lab.example.com     - Jump server
+	   - utility.lab.example.com         - Main node for OCP cluster [DNS/HAproxy/DHCP/PXE/APache/NFS-StorageClass etc]
+	   - bastion.lab.example.com         - Connect student to cluster network 
+	   - classroom.example.com           - It allow to connect OCP env outside (Public domain).
+	   - master01-03.ocp4.example.com    - Control plain node 
+	   - worker01-02.ocp4.example.com    - End user application/ VMs running here.
+	     FYI- maste node act as "master & Worker roles".
+       - ceph.ocp4.example.com           - ODF
+       - registry.ocp4.example.com       - git-source code/helm etc.
+	   - server.srv.example.com          - done 
+	   
+Point-03-) 
+##- Red Hat OpenShift Virtualization.
+
+applications -> app1;app2;app3 
+
+Case-01:- Deploy all these application on single node (Physical Machine - PM).
+app1-> Java based 
+app2-> Python based 
+app3-> php based
+
+Might use "custom share libs", if any patch applied to PM-01
+
+Case-02:- Virtulization:-
+vm01-> app1
+vm02-> app2 
+vm03-> app3 
+
+Case-03:- Containerization 
+
+==========
+Introduction to OpenShift Virtualization
+Figure 1.2: Containerizing KVM
+
+RHV (Red Hat Virtualization) - OLD:-
+- KVM runs directly on host.
+- Kernel Based Virtual Machine (It's a hypervisor - which allow to create VMs).
+- All hosts/VMs managed by RHV-M 
+- RHV-Manager send instruction to VDSM (Video Display Server manager - agent)
+- Libvit -> Define the VMs 
+- QEMU -> Qemulater 
+- KVM -> Kernal Based Virtual machine is an hypervisor which allow to create VMs (defined by libvirt)
+  and qemulated by QEMU.
+
+Example:-
+- Admin create VMs from RHV-M
+- RHV-M send instruction -> vdsm 
+- vdsm instructs libvirt
+- Libvirt start the VMs using QEMU/KVM.
+- VMs' runs on RHV hots hardware.
+
+
+===============
+###  Kubernetes Vs OpenShift
+
+Lets discussed quickly w.r.t k8s (kubernetes).
+https://kubernetes.io/
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+https://kubernetes.io/docs/setup/production-environment/container-runtimes/
+ 
+  layer-06   End user application [Like banking application or BFSI level deployment]
+  layer-05   Add-on kubernetes services [Like - network/authentication/LB/monitoring/etc]
+  layer-04   Certified kubernetes orchestration tool (k8sV1.32)
+             [kubelet,kube-apiserver,kube-controller-manager,kube-scheduler,etcd]   
+			 kubelet only systemd process here, rest all are deployed as container.
+  layer-03   Install- Container Run Time [containerd,crio,docker,Miratis Container Runtime etc]
+              crio also systemd process here- systemctl status crio/kubelet
+  layer-02   Install- Operating System (OS) - RHEL/SUSE - Enterprise Linux.
+  layer-01   hardware/Cloud/Virtualization 
+
+
+Lets discussed quickly w.r.t OpenShift.
+  layer-07   End user application [Like banking application or BFSI level deployment]
+  layer-06   Red Hat openshift Platform Plus [AI,ACM,ACS,Quay,3sacleAPI,kubeVirt etc]
+  layer-05   Red Hat OpenShift Container Platform (RHOCP - Red Hat OpenShift Container Platform)
+  layer-04   Red Hat openshift Kubernetes Engine (RHOKE - Red Hat OpenShift Kubernetes Engine)
+  layer-04   Certified kubernetes orchestration tool (k8sV1.32)
+  layer-03   Install- Container Run Time (crio)
+  layer-02   Install- Red Hat Enterprise Linux CoreOS 
+  layer-01   hardware/Cloud/Virtualization 
+  
+================
+
+  
+
