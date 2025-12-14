@@ -1,0 +1,92 @@
+#Quick Recap:-
+- DO316 - (OpenShift Virtualization based on KubeVirt):-
+#- Virtualization Concepts:-
+   What is System Virtualization?
+   Virtualization allows one physical server to be divided into multiple virtual machines (VMs).
+  
+Example:- 
+  A single Dell Server with 64GB RAM and 20 cores can run 6 VMs each assigned 8-10GB RAM, 2-4Core CPU.
+  Each VMs having own:-
+  - OS 
+  - CPU
+  - RAM
+  - Disk 
+  - Network Interface 
+  
+# Why Virtualization?
+  - Better usages of servers.
+  - Faster VM deployment 
+  - Cheaper than buying multiple physical machine.
+  
+# What is Hypervisor?
+  Hypervisor is an OS, which manage the virtual Machine.
+  
+  Types:-
+  Type-1 - Bare Metal (Run directly on hardware (KVM, ESXi, Hyper-V etc)
+  Type-2 - Run inside an OS (VirtualBox, VMware workstation etc).
+  
+# manager (KVM-Mgr;Vcenter etc) manage hosts & VMs.
+  Host vs Guest 
+   Host = Physical machine running on hypervisor 
+   Guest= VM running on the host.
+
+   RHEL coreOS worker node - Host 
+   Window server VM running on it = Guest    
+    
+# Virtualization Manager:-
+  Manage control multiple hypervisor and VMs .
+   - VMware vCenter 
+   - Red Hat Virtualization Manager
+   - OpenShift Virtualization (KubeVirt).
+   
+ 
+Virtualization Vs Cloud:-
+- Virtualization technologies allow to create VMs w.r.t Physical Machine.
+
+- Cloud Computing - Provides IaaS, PaaS, SasS via Virtualization.
+
+Virtualization vs Containerization.
+ - VirtualMachine:-     
+   1. HeavyWeight 
+   2. Require full OS.
+   3. Boots in few mins 
+   4.Best for Legacy apps
+   
+ - COntainerization:-
+   1. Light Weight 
+   2. Shared the host OS kernel 
+   3. Start in few socunds 
+   4. Best of microservice 
+
+
+KubeVirt Container = [Libvirt + QMU/KVM -> Instance ]  
+
+-------
+Task-01:-
+
+NameSpace=My-k8s-lab
+VMs:-
+vm-k8s-master01
+vm-k8s-master02
+vm-k8s-master03
+
+vm-k8s-worker01
+vm-k8s-worker02
+vm-k8s-service-node [DNS,Other required service) 
+
+Task-02:-
+Network connectivity (ssh and packages installation).
+
+
+===========
+1-# Installed "OpenShift Virtualization" Opearator.
+2-# Created 3 VMs via template (Using KubeVirt - OCP web Console)
+3-# ssh and httpd connectivity.
+4-# VMs operations (yum repo).
+
+
+LABEL='kubevirt.io/domain=vm-k8s-master01'
+POD=$(oc get pod -l ${LABEL} -o name)
+echo ${POD}
+
+oc expose ${POD} --name=vm-k8s-master01 --type=LoadBalancer --selector kubevirt.io/domain=vm-k8s-master01 --port=22 -o yaml --dry-run=client > vm-k8s-master01-service.yaml
