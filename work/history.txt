@@ -1,0 +1,85 @@
+    1  cat /etc/redhat-release 
+    2  cat /etc/yum.repos.d/
+    3  cd /etc/yum.repos.d/
+    4  ll
+    5  cat rhel_dvd.repo 
+    6  oc get nodes
+    7  oc get vmi
+    8  oc get network -o yaml 
+    9  oc get vmi
+   10  oc get network
+   11  oc get network -o yaml 
+   12  cd
+   13  mkdir work 
+   14  cd work/
+   15  pwd
+   16  ll
+   17  vim myscript.sh 
+   18  oc get pods
+   19  oc get cdi 
+   20  oc get vm
+   21  oc get vmi 
+   22  oc get svc 
+   23  oc get pods -n metallb-system 
+   24  oc project metallb-system 
+   25  oc get ipaddresspools.metallb.io 
+   26  oc project my-k8s-labs 
+   27  oc get pods
+   28  oc get vmi 
+   29  cat myscript.sh 
+   30  oc get all
+   31  cat myscript.sh 
+   32  LABEL='kubevirt.io/domain=vm-k8s-master01'
+   33  POD=$(oc get pod -l ${LABEL} -o name)
+   34  echo $POD
+   35  pod/virt-launcher-vm-k8s-master01-4wl9r
+   36  #pod/virt-launcher-vm-k8s-master01-4wl9r
+   37  oc expose pod/virt-launcher-vm-k8s-master01-4wl9r --type=LoadBalancer --selector kubevirt.io/domain=vm-k8s-master01  --port=22 -o yaml --dry-run=client >vm-k8s-master01-service.yaml
+   38  vim vm-k8s-master01-service.yaml 
+   39  oc apply -f vm-k8s-master01-service.yaml 
+   40  vim vm-k8s-master01-service.yaml 
+   41  oc apply -f vm-k8s-master01-service.yaml 
+   42  oc get svc 
+   43  ssh -l linuxadm -i ~/.ssh/lab_rsa 192.168.50.22
+   44  scp /home/student/.ssh/lab_rsa linuxadm@192.168.50.22:~/
+   45  ssh -l linuxadm -i ~/.ssh/lab_rsa 192.168.50.22 
+   46  ll
+   47  cp -rpv vm-k8s-master01-service.yaml vm-k8s-master02-service.yaml 
+   48  cp -rpv vm-k8s-master01-service.yaml vm-k8s-master03-service.yaml 
+   49  vim vm-k8s-master02-service.yaml 
+   50  #oc expose pod/virt-launcher-vm-k8s-master01-4wl9r --type=LoadBalancer --selector kubevirt.io/domain=vm-k8s-master02  --port=22 -o yaml --dry-run=client >vm-k8s-master02-service.yaml
+   51  oc get all 
+   52  oc expose pod/virt-launcher-vm-k8s-master02-f84hn --type=LoadBalancer --selector kubevirt.io/domain=vm-k8s-master02  --port=22 -o yaml --dry-run=client >vm-k8s-master02-service.yaml
+   53  oc expose pod/virt-launcher-vm-k8s-master03-8bhxx --type=LoadBalancer --selector kubevirt.io/domain=vm-k8s-master03  --port=22 -o yaml --dry-run=client >vm-k8s-master03-service.yaml
+   54  ll
+   55  oc get svc 
+   56  oc apply -f vm-k8s-master02-service.yaml -f vm-k8s-master03-service.yaml
+   57  oc get svc 
+   58  oc new-app --name myapp httpd
+   59  oc get pods 
+   60  oc get vmi 
+   61  oc get svc 
+   62  ll
+   63  vim vm-k8s-master02-service.yaml 
+   64  oc apply -f vm-k8s-master02-service.yaml 
+   65  oc get svc 
+   66  oc edit svc 
+   67  oc edit svc  myapp 
+   68  oc edit svc 
+   69  oc get svc 
+   70  ll
+   71  vim vm-k8s-master03-service.yaml 
+   72  #oc expose pod/virt-launcher-vm-k8s-master03-8bhxx --type=LoadBalancer --selector kubevirt.io/domain=vm-k8s-master03  --port=22 -o yaml --dry-run=client >vm-k8s-master03-service.yaml
+   73  oc get all
+   74  ll
+   75  vim vm-k8s-master03-service.yaml 
+   76  oc apply -f vm-k8s-master03-service.yaml 
+   77  oc get svc 
+   78  ssh -l linuxadm -i ~/.ssh/lab_rsa 192.168.50.22  
+   79  oc get svc 
+   80  curl http://192.168.50.22
+   81  ssh -l linuxadm -i ~/.ssh/lab_rsa 192.168.50.22  
+   82  ll
+   83  vim vm-k8s-master01-service.yaml 
+   84  ll
+   85  history > history.txt 
