@@ -1,0 +1,98 @@
+- Red Hat OpenShift (Product - RHOSP):-
+- Red Hat OpenShift Virtulization (Add-On service - RHOV - based on KubeVirt).
+- Concepts w.r.t KubeVirt:-
+  - RHOSP (Running with RHEL coreOS)
+  - RHEL CoreOS is container optimized OS which allow to create/manage containers.
+  - kubevirt conatiner = [LibVirt + QMEU/KVM + VM]
+    FYI- All policies and rules w.r.t PODS/Container is same as VMs (KubeVirt based).
+- Install Red Hat OpenShift Virtulization Operator.
+- Key components (KubeVirt Container Runtime):-
+  1- virt-api -> Expose VM CRDs 
+  2- virt-controller -> Orchestrates VM lifrcycle 
+  3- virt-handler -> Run on nodes and monitors VMs (It deployed as DaemonSet)
+  4- virt-launcher (Container) -> Start Libvirt + QMEU/KVM + VM inside POD.
+  
+Backend Flow in OpenShift Virtulization:-
+1- Admin Create a VMs YAML (CR- VirtualMachine)
+   
+   apiVersion: kubevirt.io/v1
+   kind: VirtualMachine
+   
+2- virt-controller sees this -> Create VMI (VirtualMachineInstance).
+3- virt-controller asks Kubernetes to schedule a POD.
+4- Kubelet start a pod containing:-
+   - virt-launcher container 
+   - inside it, libvirtd 
+   - libvirtd start QEMU/KVM 
+5- VM run inside the POD, using node hardware virtulization.
+
+***
+Difference vs RHV  (ESXi/Other):-
+- In RHV, libvirtd runs on the host (RHV-H,ESXi/Other).
+- In OpenShift Virtilization, libvirtd runs inside the pod (container).
+
+KubeVirt Container:-
+ - LibVirt     (Define the VMs resources)
+ - QEMU        (QEMU- Emulate the actual hardware)
+ - KVM         (KVM as hypervisor allow to create VMs)
+ - VMs         (VM defination as per LibVirt and via QMEU/KVM it create VMI).
+ 
+
+####
+1- virt-api (Cluster-level component):-
+  - Provide REST API entry point for VM operations.
+  - Validates VM CRDs (VirtualMachine,VirtualMachineInstance).
+
+ Example:-
+  Admin sends "oc create -f myvm.yaml" -> API server -> virt-api validates -> store in ETCD.
+
+2- virt-controller (Cluster-level component):-
+   - Responsible for the lifecycle of VirtualMachineInstance (VMIs).
+   Tasks:-
+      - Create POD for running VM.
+	  - Handle shutdown/restart/start/stop,scale etc 
+	
+   Example:- 
+    If a VM CRD say:-  FYI- VM is defination and VMI is actual Virtual Machine.
+	running: true  
+	
+	"virt-controller" create a POD with "virt-launcher" to run that VM.
+	
+3- virt-handler (Node-level DaemonSet):-
+   - Runs one pods on each node (DaemonSet):-
+   Responsibilities:-
+     - Watches for VM pod changes.
+	 - manage node-local operations (eg:- cgroup, kernel modules, CPU pinning).
+	 
+	 Example:-
+	  If VM needs dedicated CPUs -> virt-handler perform pinning on the node.
+	  
+	  What is CPU pinning?
+	  CPU pinning means binding a virtual mahcine's VCPUs to specific physical CPU core (pCPU)\
+	  on am OpenShift worker node.
+	  
+	  Default Kubernetes shedules CPU in shared.
+ 
+
+4- virt-launcher (Pod-level components).
+   
+   
+#####
+HyperConverged Operator (HCO):-
+Meta/Master operator this will deploy all required Virtilization Operators.
+- CDI (data importer).
+- SSP (Template, boot source)
+- CNV Operator
+- HostPath Previsioner
+- Network Addons 
+- Webhook validation 
+- CLI download tools.
+
+
+LAB:-
+namespace=my-k8s-lab:-
+-VMs (3 master)
+-VMs (2 worker)
+
+Setup the networking (Additonal port - like enabled 22/80 tcp port for all VMs).
+Enable ssh connection to each VMs.
