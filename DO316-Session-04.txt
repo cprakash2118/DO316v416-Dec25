@@ -1,0 +1,98 @@
+#####
+HyperConverged Operator (HCO):-
+Meta/Master operator this will deploy all required Virtilization Operators.
+- CDI (data importer).
+- SSP (Template, boot source)
+- CNV Operator
+- HostPath Previsioner
+- Network Addons 
+- Webhook validation 
+- CLI download tools.
+
+
+LAB:-
+namespace=my-k8s-lab:-
+-VMs (3 master)
+-VMs (2 worker)
+
+Setup the networking (Additonal port - like enabled 22/80 tcp port for all VMs).
+Enable ssh connection to each VMs.
+
+
+*****************
+HCO components:-
+
+1-)
+Resources- HCO-Webhook  
+Role - Validates CR 
+Example - Blocks invalid VM config 
+
+2-) 
+Resources- HyperConverged-cluster-cli-download
+Role - It provides "virtctl"
+Example: Login to OCP cluster and right corner download the CLI.
+
+# tar -xzf virtctl.gz  
+# cp -rv virtctl /usr/local/bin 
+
+3-) 
+Resources-Kubevirt-kubevirt-hyperconverged
+Role- Main Virtilization Operator 
+Example: Deploy KubeVirt CRDs.
+
+4-)
+Resources:-ssp-kubevirt-hyperconverged 
+Role:- SSP operator
+Example:- Provides VMs temapltes (Like RHEL,Window etc).
+
+5-) 
+Resources:- cdi-kubevirt-hyperconverged 
+ROle:- Enables Data Import  
+Example:- Upload ISO to PVC 
+
+6-) 
+Resources-netwrokAddOnConfig 
+Role:- Provides netwrok feature 
+Example:- (Default CNI - OVNKubernetes ; old=OpenShiftSDN), Multus CNI, OVN plugins 
+
+7-)
+Resources:- hostpath-provisioner-operator 
+role:- Storage 
+Example:- Local PV Storage for VM disks.
+
+CRs include (Deployed HCO):-
+- CDI CR -> enable disk upload 
+- HPP CR - > Local Storage for VMs 
+- Network Addon CR -> Secondary Network (Multus CNI)
+- SSP CR -> Template
+- KubeVirt CR -> Virtilization engine
+
+Flow example:-
+Step-1-# Install Operator in "Openshift-cnv"
+Step-2-# UI asks -> "Create HyperConverged"
+Step-3-# VM components get deployed across nodes
+Step-4-# User goes to Virtulization and create VirtualMachine.
+Step-5-# Create VMs from temapltes
+Step-6-# "virt-controller" create VM pod 
+Step-7-# virt-launcher start VMs inside KubeVirt Container [Libvirt + QEMU/KVM + VM]
+Step-8-# User connects using "virtctl" - Example:- virtctl console myvm 
+
+
+
+
+LAB:-
+namespace=my-k8s-lab:-
+-VMs (3 master)
+-VMs (2 worker)
+
+Setup the networking (Additonal port - like enabled 22/80 tcp port for all VMs).
+Enable ssh connection to each VMs.
+
+virt-launcher (pod)
+vm  (VirtualMachine Defination)
+vmi (VirtualMachineInstance - Actual VM - VM as service inside "virt-launcher").
+cdi (Cluster level)
+pvc 
+
+Application Deployment (POd/VMs - same)
+Access VMs via ssh (
