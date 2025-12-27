@@ -1,0 +1,59 @@
+#Product - RHOCP (Red Hat OpenShift)
+#Add-On Service - Red Hat OpenShift Virtulization (RHOV) - Based on KubeVirt)
+
+Deploy "Red Hat OpenShift Virtulization Operator" -> HyperConvered 
+KubeVirt env enabled.
+
+KubeVirt Container -> [libvirt + QEMU/KVM + VM]
+VM-01 - KubeVirt-01 
+VM-02 - KubeVirt-02
+
+Network Part:-
+ - Default CNI RHOCPv412 >= version -> OVNKubernetes [OpenVirtualNetwork which is based on OVS].
+ - POD Network 
+ - Service Network 
+ 
+$ oc new-app --name myapp httpd 
+oc get pods 
+oc get rs
+oc get deployment 
+oc get svc (by default with ClusterIP)
+
+FYI- Expose service and create route (This is for HTTP/S based application - Web Application).
+
+Expose service with LoadBalancer (metalLB service - For Self Managed OCP cluster) & NodePort (Very OLD).
+
+LAB-Example:-
+VM-01 
+VM-02 
+VM-03 
+FYI- default all vms are connected with POD network 
+Enabled all three type of services [ClusterIP, LoadBalancer, NodePort]
+
+How to access VM (KubeVirt).
+1-) Web Console via OpenShift Web Console 
+2-) CLI console via virtctl utility
+3-) ssh to be enabled with all VMs (sysadmin point of view).
+
+Network Policies [w.r.t ingress/egress traffice]
+ingress - Implement network policies on each namespace.
+Default create DMZ setup (Deny all for ingress traffice w.r.t namespace).
+
+Additional Network (via Multus CNI with nmstate operator).
+
+
+LABEL='kubevirt.io/domain=vm-01'
+POD=$(oc get pod -l ${LABEL} -o name)
+echo ${POD}
+
+
+oc expose ${POD} --name=svcName \
+--type=LoadBalancer --selector kubevirt.io/domain=vm1 --port=22 \
+-o yaml --dry-run=client | tee service.yaml
+
+
+virtctl create vm --name vm-02 --namespace lab-demo01 --memory=5Gi --volume-datasource=src:openshift-virtualization-os-images/rhel9-do31
+
+
+set the label on namespace level 
+set the network policy 
