@@ -1,0 +1,37 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  creationTimestamp: null
+  name: vm-02
+  namespace: lab-demo01
+spec:
+  dataVolumeTemplates:
+  - metadata:
+      creationTimestamp: null
+      name: vm-02-ds-rhel9-do316
+    spec:
+      sourceRef:
+        kind: DataSource
+        name: rhel9
+        namespace: openshift-virtualization-os-images
+      storage:
+        resources: {}
+  preference:
+    inferFromVolume: vm-02-ds-rhel9-do316
+    inferFromVolumeFailurePolicy: Ignore
+  runStrategy: Always
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      domain:
+        devices: {}
+        memory:
+          guest: 5Gi
+        resources: {}
+      terminationGracePeriodSeconds: 180
+      volumes:
+      - dataVolume:
+          name: vm-02-ds-rhel9-do316
+        name: vm-02-ds-rhel9-do316
+status: {}

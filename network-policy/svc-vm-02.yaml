@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    kubevirt.io: virt-launcher
+    kubevirt.io/created-by: 4fa92962-d9d2-4c68-b9aa-1741725d4945
+    kubevirt.io/domain: vm-02
+    kubevirt.io/nodeName: master02
+    vm.kubevirt.io/name: vm-02
+  name: svc-vm-02
+spec:
+  ports:
+  - port: 22
+    protocol: TCP
+    targetPort: 22
+  selector:
+    kubevirt.io/domain: vm-02
+  type: LoadBalancer
+status:
+  loadBalancer: {}

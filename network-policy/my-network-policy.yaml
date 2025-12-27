@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  creationTimestamp: "2025-12-27T10:35:23Z"
+  generation: 1
+  name: allow-db-clients
+  namespace: network-policy
+  resourceVersion: "410062"
+  uid: cb3c04da-7e43-49ab-9f88-9e11819019f1
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          allowing: db-clients
+      podSelector: {}
+    ports:
+    - port: 3306
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: mariadb-server
+  policyTypes:
+  - Ingress

@@ -1,0 +1,100 @@
+apiVersion: v1
+items:
+- apiVersion: kubevirt.io/v1
+  kind: VirtualMachine
+  metadata:
+    finalizers:
+    - kubevirt.io/virtualMachineControllerFinalize
+    generation: 3
+    name: vm-02
+    namespace: lab-demo01
+  spec:
+    dataVolumeTemplates:
+    - metadata:
+        name: vm-02-volume
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: rhel9
+          namespace: openshift-virtualization-os-images
+        storage:
+          resources: {}
+    instancetype:
+      kind: virtualmachineclusterinstancetype
+      name: u1.medium
+    preference:
+      kind: virtualmachineclusterpreference
+      name: rhel.9
+    running: true
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          kubevirt.io/domain: vm-01
+          network.kubevirt.io/headlessService: headless
+      spec:
+        accessCredentials:
+        - sshPublicKey:
+            propagationMethod:
+              noCloud: {}
+            source:
+              secret:
+                secretName: ssh-keygen-01
+        architecture: amd64
+        domain:
+          devices:
+            disks:
+            - disk:
+                bus: virtio
+              name: cloudinitdisk
+          machine:
+            type: pc-q35-rhel9.4.0
+          resources: {}
+        subdomain: headless
+        volumes:
+        - dataVolume:
+            name: vm-01-volume
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              chpasswd:
+                expire: false
+              password: redhat
+              user: labuser
+          name: cloudinitdisk
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2025-12-27T09:48:12Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: null
+      message: All of the VMI's DVs are bound and not running
+      reason: AllDVsReady
+      status: "True"
+      type: DataVolumesReady
+    - lastProbeTime: null
+      lastTransitionTime: null
+      status: "True"
+      type: LiveMigratable
+    - lastProbeTime: "2025-12-27T09:48:39Z"
+      lastTransitionTime: null
+      status: "True"
+      type: AgentConnected
+    created: true
+    desiredGeneration: 3
+    observedGeneration: 3
+    printableStatus: Running
+    ready: true
+    runStrategy: Always
+    volumeSnapshotStatuses:
+    - enabled: true
+      name: rootdisk
+    - enabled: false
+      name: cloudinitdisk
+      reason: Snapshot is not supported for this volumeSource type [cloudinitdisk]
+kind: List
+metadata:
+  resourceVersion: ""

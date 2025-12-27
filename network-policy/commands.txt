@@ -1,0 +1,1 @@
+oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila

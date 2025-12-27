@@ -1,0 +1,150 @@
+    1  ssh lab@utility 
+    2  oc whoami 
+    3  oc login -u admin -p redhatocp https://api.ocp4.example.com:6443 
+    4  oc whoami --show-ocons
+    5  oc whoami --show-console 
+    6  oc get sc
+    7  oc get storageclusters.ocs.openshift.io -n openshift-storage 
+    8  oc get og,ip,sub,csv -n openshift-cnv 
+    9  oc project lab-demo01 
+   10  oc get pods 
+   11  oc get cdi 
+   12  oc get pvc 
+   13  oc get vm 
+   14  oc get vmi
+   15  oc get pods -o wide 
+   16  oc rsh virt-launcher-vm-01-vhv54
+   17  oc get vmi 
+   18  cd Downloads/
+   19  pwd
+   20  ll
+   21  tar -zxf virtctl.tar.gz 
+   22  ll
+   23  sudo cp -rpv virtctl /usr/local/bin/
+   24  virtctl console vm-01
+   25  oc get vmi 
+   26  oc get svc 
+   27  oc get all
+   28  LABEL='kubevirt.io/domain=vm-01'
+   29  POD=$(oc get pod -l ${LABEL} -o name)
+   30  echo ${POD}
+   31  oc get vmi 
+   32  LABEL='kubevirt.io/domain=vm-01'
+   33  POD=$(oc get pod -l ${LABEL} -o name)
+   34  echo ${POD}
+   35  oc get pod -l ${LABEL} -o name
+   36  oc edit vm vm-01 
+   37  LABEL='kubevirt.io/domain=vm-01'
+   38  oc get pod -l ${LABEL} -o name
+   39  POD=$(oc get pod -l ${LABEL} -o name)
+   40  echo ${POD}
+   41  oc expose ${POD} --name svc-vm-01 --type LoadBalancer --selector kubevirt.io/domain=vm-01 --port 22 -o yaml --dry-run=client > svc-vm-01.yaml 
+   42  vim svc-vm-01.yaml 
+   43  oc get svc 
+   44  oc apply -f svc-vm-01.yaml 
+   45  oc get svc 
+   46  ssh labuser@192.168.50.22
+   47  ll
+   48  virtctl create vm --name vm-02 --namespace lab-demo01 --memory=5Gi --volume-datasource=src:openshift-virtualization-os-images/rhel9-do31 > vm-02.yaml 
+   49  vim vm-02.yaml 
+   50  oc apply -f vm-02.yaml 
+   51  vim vm-02.yaml 
+   52  virtctl create vm --name vm-02 --namespace lab-demo01 --memory=5Gi --volume-datasource=src:openshift-virtualization-os-images/rhel9-do316 > vm-02.yaml 
+   53  oc apply -f vm-02.yaml 
+   54  oc get cdi 
+   55  oc get vm -o yaml > vm-referece.yaml 
+   56  vim vm-referece.yaml 
+   57  vim vm-02.yaml 
+   58  vim vm-referece.yaml 
+   59  vim vm-02.yaml 
+   60  ll
+   61  vim vm-02.yaml 
+   62  oc apply -f vm-02.yaml 
+   63  oc get pods
+   64  oc get vmi 
+   65  oc get vm
+   66  POD=$(oc get pod -l ${LABEL} -o name)
+   67  LABEL='kubevirt.io/domain=vm-01'
+   68  LABEL='kubevirt.io/domain=vm-02'
+   69  POD=$(oc get pod -l ${LABEL} -o name)
+   70  echo $POD
+   71  oc edit vm vm-02 
+   72  oc edit vm vm-01 
+   73  oc edit vm vm-02 
+   74  LABEL='kubevirt.io/domain=vm-02'
+   75  POD=$(oc get pod -l ${LABEL} -o name)
+   76  echo $POD
+   77  oc expose ${POD} --name svc-vm-02 --type LoadBalancer --selector kubevirt.io/domain=vm-02 --port 22 -o yaml --dry-run=client > svc-vm-02.yaml 
+   78  vim svc-vm-02.yaml 
+   79  oc apply -f svc-vm-02.yaml 
+   80  oc get svc 
+   81  ssh cloud-user@192.168.50.23
+   82  ssh -i ~/.ssh/lab_rsa cloud-user@192.168.50.23
+   83  ssh cloud-user@192.168.50.23
+   84  ssh root@192.168.50.23
+   85  ll
+   86  vim vm-02.yaml
+   87  oc edit vm vm-02
+   88  grep -ir user * 
+   89  vim vm-referece.yaml
+   90  oc delete project lab-demo01 
+   91  lab start -t do316 network-policy
+   92  oc project metallb-system 
+   93  oc get pods
+   94  oc get ipaddresspools.metallb.io 
+   95  lab start -t do316 network-policy
+   96  cd
+   97  lab start -t do316 network-policy
+   98  oc project network-policy 
+   99  oc project -q 
+  100  oc get pods
+  101  oc get vm
+  102  oc get vmi
+  103  oc get networkpolicies.networking.k8s.io 
+  104  cd  DO316/labs/network-policy/
+  105  pwd
+  106  ll
+  107  cat commands.txt 
+  108  oc get project network-policy --show-labels 
+  109  oc get project network-policy --show-labels | grep allow
+  110  oc label namespace network-policy allowing=db-clients
+  111  oc get project network-policy --show-labels | grep allow
+  112  oc get vmi mariadb-server --show-labels
+  113  oc get networkpolicy 
+  114  oc get networkpolicy allow-db-clients  -o yaml 
+  115  oc get svc
+  116  oc get all
+  117  virtctl expose vmi mariadb-server --name mariadb --type ClusterIP --port 3306 --target-port 3306 
+  118  oc get svc 
+  119  oc describe  svc 
+  120  ll
+  121  cat commands.txt 
+  122  oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila
+  123  #oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila
+  124  oc get pods
+  125  oc run testdb --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5
+  126  oc get pods
+  127  oc delete pod testdb 
+  128  oc run testdb --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 
+  129  oc get pods
+  130  oc delete pod testdb 
+  131  cat commands.txt 
+  132  oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila
+  133  oc new-project test-project
+  134  oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila
+  135  oc project network-policy 
+  136  oc get networkpolicies.networking.k8s.io 
+  137  oc get networkpolicies.networking.k8s.io allow-db-clients -o yaml > my-network-policy.yaml 
+  138  vim my-network-policy.yaml 
+  139  oc project -q
+  140  oc project test-project 
+  141  oc label namespace test-project allowing=db-clients
+  142  oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila
+  143  oc label namespace test-project allowing=-
+  144  oc label namespace test-project allowing-
+  145  oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila
+  146  oc label namespace test-project allowing=db-clients
+  147  oc run testdb -it --rm --image=registry.ocp4.example.com:8443/redhattraining/mariadb:10.5 --command -- mysql --connect-timeout=5 -u devuser -p'developer' -h mariadb.network-policy.svc.cluster.local sakila
+  148  ssh utility 
+  149  oc get nodes -o wide 
+  150  history > history.txt 
