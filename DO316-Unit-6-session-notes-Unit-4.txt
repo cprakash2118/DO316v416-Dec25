@@ -1,0 +1,143 @@
+#Unit-4-Connecting Virtual Machines to External Networks
+4.1- Advanced Networking with Multus CNI 
+4.2- Configuring Multihomed Nodes and Virtual Machines.
+
+
+4.1- Advanced Networking with Multus CNI :-
+
+POint-01-#
+   1- Every POD gets its own IP (POD-Network; Pod Level IP), so pod-to-pod communication doesn't required port 
+      mapping method (No additional setup needed - by default done via default CNI).
+   2- Kubernetes networking required:-
+     - POD can communication without NAT.
+	 - PODs and node agents can coomunicate when on the same node.
+   3- Because IP is at POD level. containers inside the same POD can use localhost to reach each other's ports.
+   
+  Why this matters for Virtual Machines?
+  - In OpenShift Virtulization, a VM is backed by POD (VMi pod).
+  - SO VM netwroking is implemented through pod networking + additional attachment.
+
+
+POint-02-# 
+   1- Multus is a CNI: It calls other CNI plugins to attach multiple interface to the same pod (VM/VMI).
+   2- With multus CNI, you can create additional network alonside the default pod network. 
+      (Even after cluster installation).
+   3- Attaching multiple network to VMs is called "Multihoming".
+   Note:- Even if you add extra network, pod must still have eth0 attched to the default network to keep cluster 
+   the cluster connectivity working.
+   
+POint-03-# How additional interface look inside the POD/VM
+   1- The default interface is tyically eth0 (pod network).
+   2- Multus-added interface follow a netN naming convention - like net1, net2 etc 
+   
+   VM/pods can looks like:-
+   eth0 -> pod network 
+   net1 -> external network 1
+   net2 -> external network 2
+   
+POint-04-# Why use multus (Use cases).
+ FYI- Multus is typically used for network isolation, for example.
+ -1- Performance:- Seperate data plane vs control plan traffic onto different interface/network.
+ -2- Security:- Keep sensitive traffic on dedicated network plane.
+ -3- External connnectivity.
+ 
+ 
+POint-05-#Building blocks your configuration:-
+A) NAD [NetworkAttachmentDefination] 
+B) CNAO (Cluster Network Addon Operator) - It manage extra VM network configuration.
+C) NMState Operator
+
+Which CNI type with Multus.
+-Bridge (Linux Bridge)
+-host-device 
+-IPVLAN/MacVLAN 
+-SR-IOV
+
+ 
+
+######################################################################
+Unit-4-Part-02-#Configuring Multihomed Nodes and Virtual Machines 
+
+What does "Multihomed" means in OpenShift Virtulization?
+- Define:- A Multihomed nodes/VMs has more than one network interface.
+           FYI- Each nodes/VMs connected to different networks.
+
+Why is matters:-
+ In enterprise environment, workload (VMs/Pods) often needs:-
+  - Once network for cluster/internal traffice.
+  - Another network for external access.
+  - A thrid for Storage/Backup/Database 
+
+  Example:-
+  Database VM (KubeVirt):-
+  NIC-1 -> OpenShift default pod network (Management)
+  NIC-2 -> Application network (APP server)
+  NIC-3 -> Backup Network (Storage)
+
+
+Solution- Multus + NMState are required.
+
+------------------------------------------------
+***
+Role of Kubernetes NMState operator:-
+  NMState provides a centralized, declarative way to configure node-level networking.
+  
+  Configure physical NICs
+  Create Linux Bridge
+  Create bonding interface 
+  Configure VLANs 
+  Applies changes without reboot 
+  
+  FYI- NMState manages host(node) networking, not POD networking.
+  
+
+Why NMState is mandatory for OpenShift Virtulization:-
+Virtual Machine:-
+ - Run inside virt-launcher pod
+ - Deponds on host networking 
+ - Need bridges or OVS bridge on the node.
+ 
+
+NMstate Operator installation & Instance deployment:-
+Step-1-# Install operator 
+ - VIa Operator Hub 
+ - CLI 
+ 
+Step-02-# Create NMState instance 
+ - You must create an NMstate CR 
+ - This deploy the NMState controller on all nodes 
+ 
+Why this step is mandatory?
+ Without Instance:-
+  - No node network reconcolliation 
+  - NNCPs won't apply 
+  - VM networking will fail silently.
+
+NMState API Resources:-
+ - NNS (NodeNetworkState):-
+   What it is?
+   - Represents the current actual network state of a node.
+   - Automatically created per node.
+   
+ - NodeNetworkConfigurationPolicy (NNCP) - Desired state.
+   What it is?
+   Declarative policy describing how node networking should look.
+   
+   What NNCP can configure:-
+   - Linux Bridge
+   - OVS Bridge
+   - Bonding 
+   - VLAN 
+   - Ethernet option 
+   - STP,MTU,DHCP,StaticIP etc 
+   
+  - NodeNetworkConfigurationEnactment (NNCE) - Execution result
+    What it is?
+	Create automatically per node per NNCP 
+	Report success/Failure/rollback 
+	
+	Why it is critical?
+	- Shows why a policy failed 
+	- Provides traceback 
+	- Shows node-level status 
+	
