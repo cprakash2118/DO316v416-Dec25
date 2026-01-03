@@ -1,0 +1,75 @@
+POint-01#- CNI (Container Network Interface) - SDN (Software Defined Networking):- 
+    1- Deployed OCP cluster [3 master, N worker]
+	2- Red Hat OpenShift Virtulization Operator deployment (Hypercovese components).
+	3- KubeVirt enabled [KubeVirt Container => LibVirt + QEMU/KVM + VM 
+	4- CRs= VirtualMachine;VirtualMachineInstance;CDI,etc 
+	5- Default CNI and service (ClusterIP, NodePort, LoadBanlancer)
+	   FYI- Create resources like VM/VMI/Service etc 
+	6- CNI [Default CNI - OVNKubernetes; Multus CNI with NMState]
+	
+POint-02#- CSI (Container Storage Interface) - SDS (Software Defined Storage)
+	CNI & CSI both managed by CNCF (k8s):-
+	Example:-
+	 ODF (OpenShift Data Foundation) - It provides Storage solution to K8s based distribution (OCP cluster).
+	 
+	 Enterprise Storage Solution:-
+	 ODF = Ceph + NooBaa 
+	 
+	 Ceph -> Provides storage [Block/File/Object]
+     FYI- Ceph is distributed Storage [3 nodes - 1 data => Data distributed acorss nodes]
+	 
+	 NooBaa -> Provides Storage [Only Object]
+     FYI- It use MCG (MultiCloud Gateway Protocol - Which can connect to any S3 provides).
+     - AWS S3 
+     - Azure 
+     - GCS 
+     - Dell etc 
+	 
+	 S3 API used for connect to Bucket (Object Storage):-
+	 S3 - Simple Storage Service
+	 
+	 Storage type - Block/File
+	 Actual Storage -> StorageClass -> PErsistentVolume -> PErsistentVolumeClaim -> Deployment/StatefulSet (Mount - CSI Plugins).
+	 
+	 Storage type -  Object
+     Actual Storage -> StorageClass -> ObjectBucket -> ObjectBucketClaim -> Deployment/StatefulSet (Access via S3 API).
+	 vim ~/.s3cfg ; s3cmd interface to communicate 
+	 
+	 
+	 Ceph Storage:- 
+	 Block level      -> RBD (RADOS Block Device)
+	 Filesystem level -> CephFS (CephFS File Storage)
+     Object Level     -> RGW (RADOS Gateway ) 
+
+	 Block/File Storage use CSI plugins 
+	 Object Storage use S3 API for connectivity.
+	 
+----------------------
+Point-01-# Using local nodes disk space (Local Storage):-
+ 1.1-# What this means ?
+   - Normally, VM disk in openshift virtulization are backed by shared back-end storage (ODF/Ceph RBD, NFS etc).
+   - Sometimes - Use local disk on the worker nodes (node's SSD/HDD) as persistent for VM disk.
+   
+   VMs/VMi -> KubeVirt Container 
+   
+   Ephemeral storage  [Temp Storage]
+   Persistent storage [Block/File/Object]
+
+
+   - Using persistent storage:- Connection to the Back-end Storage
+	 CSI plug-ins [RBD plugins ; CephFS plugins]
+	 StorageClass [Block - RBD/RBD-Virt Plugins]
+	 
+   - Persistent Volumes and Persistent Volume Claims
+     PV/PVC - Depends on StorageClass (Static or Dynamaic Clss).
+
+   - Volume Modes:-
+     Filesystem Block level 
+	 
+   - Volume Access Modes:-   
+      - Read;Write;Once  
+	  - Read;only;Once 
+	  - Read;OnlyMany
+	  - Read;Write;Many
+	  
+	SC -> PV -> PVC -> Deployment
