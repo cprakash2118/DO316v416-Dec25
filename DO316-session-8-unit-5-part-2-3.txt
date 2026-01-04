@@ -1,0 +1,146 @@
+#Managing Storage on Virtual Machine:-
+
+Point-01-#
+ - What this means? Manage Storage on VMs (VMI/KubeVirt Container).
+   - Virtual Machine (VMs) is OpenShift (KubeVirt) do not use disks directly.
+   - They use Kubernetes storage abstraction:-
+     - PVC (PersistentVolumeClaim)
+	 - PV (PersistentVolume)
+	 - StorageClass (SC)
+ 
+ - Why this matters?
+   - Storage lifecycle is decoupled from Virtual Machine (VM) lifecycle.
+   - What you can do?
+     - Add/remove disk 
+	 - Resize disks 
+	 - Reattach disk to another Virtual Machine (VMs).
+	 - Delete disks independently.
+	
+	Example:- 
+	A MariaDB virtual machine:-
+	  - Root disk -> OS 
+	  - Data disk -> /var/lib/mysql/
+	  - Backup disk -> /backup 
+	  
+	  Each disk = Seperate PVC 
+
+Point-02-# Connecting a Virtual Machine (VM) to multiple disks.
+    - OpenShift Virtulization use DataVOlume 
+	- DataVOlume dynamically:
+	  - Create a PVC (Associated PV from respective SC will be created - Based on the provisioner)
+	  - Populates it (Black,CLone,URL,registry,upload)
+	  - Attache it as a disk to VM 
+
+----------------------------------------	
+	DataVOlume:-
+	 - What is DataVOlume in OpenShift Virtulization (KubeVirt based)?
+	   OpenShift Virtulization uses DataVOlume as a first-class object for managing VM disk 
+	   data - Importing, cloning and populating virtual machine disk in a Kubenetes-native way.
+	   
+	 - What is DataVOlume (DV)?
+	   A "DataVOlume" (DV) is a kubernetes custom resource that automates the crration and population of 
+	   PVC with VM disk data for OpenShift Virtulization (KubeVirt based Virtulization).
+	   
+	   
+	 - Why DataVOlume (DV) required ?
+	   In classic Virtulization (VMware-ESXI/RHV-KVM)
+	   - Disk Creation 
+	   - Disk copy 
+	   - Disk import (OVA,QCOW2,RAW,ISO etc).
+	   
+	   FYI- ALl these are handled outside Kubernetes.
+	   
+	  In OpenShift Virtulization (Everything must be):-
+	    - Declarative 
+		- API-driven 
+		- Kubernetes-native (Cloud-Native -> CNCF).
+		
+		NOte: DataVOlume bridges Kubernetes Storage (PVC) and VM disk.
+		
+	VirtualMachine 
+	|- User(UI) -> DataVOlume  (Backend execution).
+	                |
+					| -> Create PVC 
+					             | 
+								 |-> Backed by (StorageClass - ODF/Non-ODF Storage SOlution).
+								 
+	   
+	- VM does not directly manage disk population.
+	- DataVolume handles:-
+	  - Disk provisioning 
+	  - Disk data transfer 
+	  - DIsk cloning 
+	  
+	  
+	- Key components involved:-
+	  - DataVolume (DV)                   - High-level object describing disk source 
+	  - PersistentVolumeClaim (PVC)       - Actual Kubernetes Storage
+	  - Containerized Data Importer (CDI) - Performs data import/clone 
+	  - StorageClass                      - Define backed Storage
+	  - VirtualMachine (vmi)              - COnsumes DV as a disk.
+	  
+	  
+    - What is CDI and why it required?
+	  Containerized Data Importer (CDI) is the engine behind DataVolume (DV).
+	  CDI:-
+	   - Spins up importer/cloner/uploader pods.
+	   - Copies disk data into PVCs.
+	   - Tracks progress and failures.
+	   
+	   FYI- Without CDI, DataVolume cannot function.
+	   
+
+  DataVolume lifecycle:-
+  1- User create DataVolume
+  2- CDI creates PVC 
+  3- CDI launches import/clone pod 
+  4- Disk data copied into PVC.
+  5- DataVolume status become succeeded 
+  6- VM attaches disk and boots.
+  
+  FYI- All steps (stage) are tracked in Kubernetes.
+
+-------------------------------------
+Unit-5-Part-03-#Connecting a Virtual Machine to External Storage (iSCSI, NFS, Fiber Channel, etc).
+- Why this matters?
+  - In VMware:- 
+    - VMs sit on shared datastores 
+	- Storage is mostly implicit 
+
+  - In OpenShift:-
+    - Storage is explicit and declarative 
+	- You must define:-
+	  - PV 
+	  - PVC 
+	  - Then attach PVC to VM (DataVolume & CDI).
+	This explicit model is critical for:-
+	 - VM migration 
+	 - DIsaster recovery 
+	 - Multi-tenant environment.
+	 
+- Storage Provisioning models (Dynamic vs Static).
+  - Dynamic Provisioning (Its consider modren Kubernetes or cloud-native way).
+    What happens:-
+	 - You create PVC 
+	 - Kubernetes automatically creats 
+	   - PV 
+	   - Backend Volume 
+	Who controls stoarge 
+	 - K8s + StorageCLass 
+	 
+	Example:-
+	 - OpenShift Data Foundation (Ceph)
+	 - Cloud Storage (AWS EBS, Azure Disk)
+	 
+	Limitation:-
+	- Not always allowed in enterprises
+	- Legacy SAN/NAS often managed manually 
+	- Example: OCP 4.18 deployment on Nutanix AOS [Deal with SAN and NAS]
+	
+	- External Storage - SAN/NAS level (SCSI/iSCSI) 
+	
+	https://wuchikin.wordpress.com/2017/01/29/data-migration-by-powerpath-migration-enabler-ppme/
+	
+https://docs.redhat.com/en/documentation/openshift_container_platform/4.11/html/installing/installing-on-nutanix
+
+  
