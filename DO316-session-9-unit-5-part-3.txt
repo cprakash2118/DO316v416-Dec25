@@ -1,0 +1,144 @@
+#Quick Recap (5-10 mins):-
+#Unit-5- Configuring Storage for Virtual Machines:-
+- Attaching Persistent Storage to Virtual Machines
+- Managing Storage Devices on Virtual Machines
+- Connecting a Virtual Machine to External Storage
+
+Storage layer w.r.t VMs (based on KubeVirt)
+From k8s point of view:-
+ - StorageClass (sc)
+ - PersistentVolume (pv)
+ - PersistentVolumeClaim (pvc)
+ 
+From KubeVirt point of view:-
+ - DataVolume
+ - CDI
+
+- k8s Storage layers + KubeVirt based CR => Provide persistent storage to VMs (KubeVirt).
+
+###- Connecting a Virtual Machine to External Storage
+Problem Statement:-
+ Connect a Virtual Machine (VM) running on OpenSHift Virtulization to external Storage.
+ FYI- iSCSI, NFS, Fiber Channel (FC) etc.
+ 
+- Why this matters?
+  W.r.t VMware:-
+   - VMs sit on shared datastores
+   - Storage is mostly implicit 
+   
+  W.r.t OpenSHift:-
+   - Storage is explicit and declarative.
+   - Important to define:-
+     - PersistentVolume (pv)
+	 - PersistentVolumeClaim (PVC)
+	 - Then attach PVC (it's actually disk) to VM (with the help of CDI/DV).
+	 
+  This explicit model is critical for:
+   - VM migration 
+   - DR (Disaster recovery)
+ 
+	https://www.cncf.io/projects/
+	https://kubevirt.io/
+	https://www.cncf.io/projects/kubevirt/
+	
+**** Implicit Vs Explicit Storage. 
+     Note:- VMs migration from VMware to OpenSHift Virtulization.
+    
+- What is implicit storage?
+	  This mean storage is assumed and automatically used, without the use explicitly defining or requesting it.
+	  
+	  FYI- This hides storage details from the user.
+	  
+	  How implicit storage workds:-
+	  1- Storga already exists.
+      2- Platform automatically place workload on it.
+      3- User does not declare:-
+         - Storage Source 
+         - Access mode
+         - Backend type		 
+	  4- Storage decisions are made behind the scenes.
+	  
+	- Implicit Storage - VMware example
+	  Scenario: Create a VM in VMware vSphere.
+	  What you do:
+	   1- Click on Create new VM.
+	   2- Select:-
+	      CPU 
+		  Memory 
+		  Disk size (100GB rootDisk)
+	   3- Chose a Datastore 
+	   4- Finish 
+	   
+      What you did NOT do:
+	   1- You did not define:-
+	     - NFS/iSCSI/FC
+		 - Access mode
+		 - Volume lifecyle 
+		 - Storage policy in YAML 
+	
+	  Why like this ?
+	    Because:
+		  - Datastore already exists.
+		  - VMware abstracts everything.
+		
+	  That's why this is "Implicit" storage.
+	  FYI- Just put my VM's disk somehere in this Datastore"
+	  
+	  Storage - Automatic 
+	  User define STorgae objects - No required 
+	  Storage lifecyle  - Hidden 
+	  VMs depending on Datastore - Yes
+	  Migration dependency - Datastore level.
+	  
+***************************************	 
+- What is Explicit storage?
+  Define- Explicit storage means Storage must be declared, requested, bound explictly before it can be used.
+  FYI- The platfrom does nothing automatically unless you define it.
+  
+- HOw explicit storage works?
+  You should define clearly few points:-
+  - What Storage exist.
+  - How to access it.
+  - Who can acces it
+  - For how long
+  
+Example:-
+ Explicit Storage as per Scenario: Attaching storage to VM in OpenSHift.
+  You must create:-
+  1- PersistentVolume (PV)
+     FYI- It discribe real/actual storage (NFS/iSCSI/FC/Ceph etc)
+	 
+  2- PersistentVolumeClaim (PVC)
+     FYI- Request storage 
+	 
+  3- VM disk attachment.
+     -> PVC attached as disk (via DataVolume & CDI).
+	 
+Example:-
+ Explicit storage to VM (KubeVirt).
+Step-1 STorgae admin create storage.
+     500GB iSCSI LUN (Boot/Binary)
+
+Step-2 Cluster admin create PV 
+     FYI- This PV represent that iSCSI LUN.
+
+Step-3 Application/VM team create PVC 
+    - We need 500BG Block Storage 
+
+Step-04 Kubernetes binds PVC -> PV 
+
+Step-05 VM attached PVC as diks (via dataVolume or CDI).
+
+    Every step is explicit.
+	
+	
+	  Storage Creation - Manual/Declarative  
+	  User define STorgae objects - Yes 
+	  Storage lifecyle  - Explicit
+	  VMs depending on PVC - Yes
+	  Migration Control - fine-grained 
+
+############
+ Storage Provisioning models (Dynamic vs Static)
+ 
+  Auctual Storage -> PV -> PVC -> VMs disk
