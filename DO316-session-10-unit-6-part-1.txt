@@ -1,0 +1,63 @@
+Unit-6-# Create and Restore Backups of Virtual Machines.
+- Exporting and Importing Virtual Machine Data and Settings
+- Managing Virtual Machine Snapshots
+- OADP Operator Deployment and Features 
+- Back up and Restore with OADP  (Migration w.r.t project-to-project; cluster-to-cluster).
+
+1- Kubernetes Resources 
+2- Images involved with deployment (APp/DB) - w.r.t internal registry 
+3- Data associated with application/DB (PV,PVC).
+
+Container:-
+ - Deployed application/DB on k8s/OCP cluster - deployment,service,route,configMap,secret etc.
+ - Internal registry (OCP) 
+ - Data w.r.t PV/PVC 
+ 
+Problem statement:-
+OpenShift Virtulization provides a native way to export a Virtual Machine (VM) + it's disks (all 
+disks associated with VMs) so that:-
+ - Move a VM from openshift cluster to other OCP cluster.
+ - Deplicate a VM into another environment (Prod to Stage/Dev/Test etc).
+ - Backup VM manifest and disk artifacts for recovery.
+ 
+
+#VirtualMachineExport (CR):-
+- When export become "Ready", it exposes:
+  1- Manifest bundle (YAML bundle)
+  2- Disk volume download link(s) - Per Volume.
+  
+Note:- Status field of CR (VirtualMachineExport):-
+ Status.link 
+  - External Link (virtctl)
+  - INternal Link 
+  
+  
+  OCP CLuster (cluster-01)
+    ns-01
+	  - 3 VMs (KubeVirt) - Manifest of (VM/VMI)
+	  - 3 services
+	  - 3 + 5  PVC (pv - Storage)
+	  
+	ns-02 
+      
+	  
+  OCP CLuster (cluster-02)
+    ns-03
+	  - 3 VMs (KubeVirt)
+	  - 3 services
+	  - 3 + 5  PVC (pv - Storage)  
+=======================================
+  1- VirtualMachineExport (CR)
+    - Temporary export object 
+	- Eposes manifets + disk images
+
+  
+  Actual Storage       Actual Storage Claim   
+     PV                   PVC
+	 
+	 Snapshots
+	 clone 
+	 
+	 
+	 kind: VolumeSnapshot [Source PVC ; Use VOlumeSnapShot Stoargeclass ]
+	 kind: PersistentVolumeClaim  [Source VolumeSnapshot  ; PVC and associated PV will be created.
